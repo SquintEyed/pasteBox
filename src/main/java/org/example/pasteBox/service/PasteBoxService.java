@@ -8,7 +8,7 @@ public interface PasteBoxService {
 
     PasteBoxEntity getByHash(String hash);
 
-    PasteBoxEntity create(PasteBoxEntity pasteBox);
+    PasteBoxEntity save(PasteBoxEntity pasteBox);
 
-    List<PasteBoxEntity> getAllLastPasteBoxes(int count);
+    List<PasteBoxEntity> getAllPasteBoxes();
 }

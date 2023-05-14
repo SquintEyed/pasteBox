@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface PasteBoxRepo extends JpaRepository<PasteBoxEntity, Long> {
 
+    PasteBoxEntity findByHash(String hash);
+
     PasteBoxEntity save(PasteBoxEntity pasteBox);
 
     List<PasteBoxEntity> findAll();
+
 }
