@@ -3,9 +3,9 @@ package org.example.pasteBox.controller;
 import org.example.pasteBox.dto.PasteBoxDto;
 import org.example.pasteBox.dto.PasteBoxDtoBuilder;
 import org.example.pasteBox.entity.PasteBoxEntity;
+import org.example.pasteBox.entity.enums.ExpirationTime;
 import org.example.pasteBox.entity.enums.Status;
 import org.example.pasteBox.service.PasteBoxService;
-import org.example.pasteBox.util.HashGenerator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,15 +19,11 @@ public class PasteBoxController {
 
     private final PasteBoxService pasteBoxService;
 
-    private final HashGenerator hashGenerator;
-
     private final PasteBoxDtoBuilder pasteBoxDtoBuilder;
 
     public PasteBoxController(PasteBoxService pasteBoxService,
-                              PasteBoxDtoBuilder pasteBoxDtoBuilder,
-                              HashGenerator hashGenerator) {
+                              PasteBoxDtoBuilder pasteBoxDtoBuilder) {
         this.pasteBoxService = pasteBoxService;
-        this.hashGenerator = hashGenerator;
         this.pasteBoxDtoBuilder = pasteBoxDtoBuilder;
     }
 
@@ -38,9 +34,7 @@ public class PasteBoxController {
         List<PasteBoxEntity> pasteBoxes = pasteBoxService.getAllPasteBoxes();
 
         return pasteBoxes.stream()
-                .sorted((p1,p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
                 .map(paste -> pasteBoxDtoBuilder.makePasteBoxDto(paste))
-                .limit(10)
                 .collect(Collectors.toList());
     }
 
@@ -53,15 +47,10 @@ public class PasteBoxController {
     }
 
     @PostMapping("/")
-    public String createNewPasteBox(@RequestParam(name = "data") String data,
-                                    @RequestParam(name = "time") Long time){
+    public String createNewPasteBox(@RequestParam(name = "data", required = true) String data,
+                                    @RequestParam(name = "expirationTime", required = true) String time){
 
-    PasteBoxEntity persistPasteBox = PasteBoxEntity.builder()
-            .data(data)
-            .expirationTimeSeconds(time)
-            .status(Status.PUBLIC)
-            .hash(hashGenerator.generateHash())
-            .build();
+    PasteBoxEntity persistPasteBox = pasteBoxService.create(data, time);
 
     pasteBoxService.save(persistPasteBox);
 

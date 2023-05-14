@@ -1,31 +1,44 @@
 package org.example.pasteBox.service.impl;
 
 import org.example.pasteBox.entity.PasteBoxEntity;
+import org.example.pasteBox.entity.enums.ExpirationTime;
+import org.example.pasteBox.entity.enums.Status;
 import org.example.pasteBox.exception.NotFoundException;
 import org.example.pasteBox.repository.PasteBoxRepo;
 import org.example.pasteBox.service.PasteBoxService;
+import org.example.pasteBox.util.UsefulFeatures;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class PasteBoxServiceImpl implements PasteBoxService {
 
     private final PasteBoxRepo pasteBoxRepo;
 
-    public PasteBoxServiceImpl(PasteBoxRepo pasteBoxRepo) {
+    private final UsefulFeatures usefulFeatures;
+
+    public PasteBoxServiceImpl(PasteBoxRepo pasteBoxRepo, UsefulFeatures usefulFeatures) {
         this.pasteBoxRepo = pasteBoxRepo;
+        this.usefulFeatures = usefulFeatures;
     }
+
 
     @Override
     public PasteBoxEntity getByHash(String hash) {
 
-        PasteBoxEntity optionalPasteBoxEntity = pasteBoxRepo.findByHash(hash);
-        if (Objects.isNull(optionalPasteBoxEntity)) {
+        PasteBoxEntity pasteBox = pasteBoxRepo.findByHash(hash);
+        if (Objects.isNull(pasteBox)) {
             throw new NotFoundException(String.format("Paste with  hash=%s not found",hash));
         }
-        return optionalPasteBoxEntity;
+
+        if (!usefulFeatures.checkTimeOfLife(pasteBox)) {
+            throw new NotFoundException(String.format("Time of life this paste(hash=%s) already over", hash));
+        }
+
+        return pasteBox;
     }
 
     @Override
@@ -35,6 +48,28 @@ public class PasteBoxServiceImpl implements PasteBoxService {
 
     @Override
     public List<PasteBoxEntity> getAllPasteBoxes() {
-        return pasteBoxRepo.findAll();
+
+        List<PasteBoxEntity> pasteBoxes = pasteBoxRepo.findAll();
+
+        List<PasteBoxEntity> actualList = pasteBoxes.stream()
+                .filter(p -> usefulFeatures.checkTimeOfLife(p))
+                .sorted((p1,p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return actualList;
+    }
+
+    @Override
+    public PasteBoxEntity create(String data, String time){
+
+        PasteBoxEntity persistPasteBox = PasteBoxEntity.builder()
+                .data(data)
+                .expirationTime(ExpirationTime.setActualExpirationTime(time))
+                .status(Status.PUBLIC)
+                .hash(usefulFeatures.generateHash())
+                .build();
+
+        return persistPasteBox;
     }
 }

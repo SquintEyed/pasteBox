@@ -11,4 +11,7 @@ public interface PasteBoxService {
     PasteBoxEntity save(PasteBoxEntity pasteBox);
 
     List<PasteBoxEntity> getAllPasteBoxes();
+
+    PasteBoxEntity create(String data, String time);
+
 }

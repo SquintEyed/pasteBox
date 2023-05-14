@@ -1,6 +1,7 @@
 package org.example.pasteBox.entity;
 
 import lombok.*;
+import org.example.pasteBox.entity.enums.ExpirationTime;
 import org.example.pasteBox.entity.enums.Status;
 import org.springframework.data.annotation.CreatedBy;
 
@@ -31,8 +32,9 @@ public class PasteBoxEntity {
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
-    @Column(name = "expiration_time_seconds")
-    private Long expirationTimeSeconds;
+    @Column(name = "expiration_time")
+    @Enumerated(value = EnumType.STRING)
+    private ExpirationTime expirationTime;
 
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
