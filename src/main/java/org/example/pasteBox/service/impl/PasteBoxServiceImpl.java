@@ -51,13 +51,7 @@ public class PasteBoxServiceImpl implements PasteBoxService {
 
         List<PasteBoxEntity> pasteBoxes = pasteBoxRepo.findAll();
 
-        List<PasteBoxEntity> actualList = pasteBoxes.stream()
-                .filter(p -> usefulFeatures.checkTimeOfLife(p))
-                .sorted((p1,p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
-                .limit(10)
-                .collect(Collectors.toList());
-
-        return actualList;
+        return usefulFeatures.getListActualPastes(pasteBoxes);
     }
 
     @Override

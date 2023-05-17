@@ -6,6 +6,8 @@ import org.example.pasteBox.util.UsefulFeatures;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsefulFeaturesImpl implements UsefulFeatures {
@@ -46,5 +48,15 @@ public class UsefulFeaturesImpl implements UsefulFeatures {
         }
 
         return actualTime.isBefore(timeOfLife);
+    }
+
+    @Override
+    public List<PasteBoxEntity> getListActualPastes(List<PasteBoxEntity> pastes) {
+
+        return  pastes.stream()
+                .filter(p -> checkTimeOfLife(p))
+                .sorted((p1,p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
+                .limit(10)
+                .collect(Collectors.toList());
     }
 }

@@ -60,12 +60,4 @@ class PasteBoxControllerTest {
         verify(pasteBoxService).getByHash(HASH);
     }
 
-    @Test
-    void createNewPasteBox() {
-
-        PasteBoxEntity pasteBoxEntity = mock(PasteBoxEntity.class);
-        when(pasteBoxService.save(pasteBoxEntity)).thenReturn(pasteBoxEntity);
-
-
-    }
 }

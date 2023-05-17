@@ -3,6 +3,7 @@ package org.example.pasteBox.service.impl;
 import org.example.pasteBox.entity.PasteBoxEntity;
 import org.example.pasteBox.exception.NotFoundException;
 import org.example.pasteBox.repository.PasteBoxRepo;
+import org.example.pasteBox.util.UsefulFeatures;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,11 +27,15 @@ class PasteBoxServiceImplTest {
     @Mock
     private PasteBoxRepo pasteBoxRepo;
 
+    @Mock
+    private UsefulFeatures usefulFeatures;
+
     @Test
     void getByHash_ShouldBeFindPaste_WhenPasteExist() {
 
         PasteBoxEntity entity = mock(PasteBoxEntity.class);
         when(pasteBoxRepo.findByHash(HASH)).thenReturn(entity);
+        when(usefulFeatures.checkTimeOfLife(entity)).thenReturn(true);
 
         PasteBoxEntity actual = pasteBoxService.getByHash(HASH);
 
@@ -54,11 +59,14 @@ class PasteBoxServiceImplTest {
     void getAllPasteBoxes_ShouldBeFindPastes() {
 
         List<PasteBoxEntity> entities = mock(List.class);
+        PasteBoxEntity entity = mock(PasteBoxEntity.class);
+        List<PasteBoxEntity> sortedPastes = mock(List.class);
         when(pasteBoxRepo.findAll()).thenReturn(entities);
+        when(usefulFeatures.getListActualPastes(entities)).thenReturn(sortedPastes);
 
         List<PasteBoxEntity> actualEntities = pasteBoxService.getAllPasteBoxes();
 
-        assertEquals(entities, actualEntities);
+        assertEquals(sortedPastes, actualEntities);
         verify(pasteBoxRepo).findAll();
     }
 }
